@@ -18,13 +18,21 @@ http://127.0.0.1:8081/servlet/~baseapp/nc.document.pub.fileSystem.servlet.Delete
 http://127.0.0.1:8081/servlet/~ic/uap.framework.rc.controller.ResourceManagerServlet
 
 FileUploadServlet.class    	需要分析	看有没其他漏洞
+
 FileReceiveServlet.class	需要分析	看有没其他漏洞
+
 FileParserServlet.class		需要分析	看有没其他漏洞
+
 FileManageServlet.class		需要分析	看有没其他漏洞
 
+
+
 ContactsQueryServiceServlet.class  
+
 ContactsFuzzySearchServlet.class
+
 ConfigResourceServlet.class  逻辑漏洞-用户验证有缺陷
+
 ActionHandlerServlet.class
 
 ## 任意文件上传
