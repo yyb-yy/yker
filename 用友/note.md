@@ -140,9 +140,14 @@ FindWebResourceServlet.class  不能../
 
 ## sql注入
 
-MdxQueryServlet.class
-
 MARosterPhotoServlet.class  已有
+
+```
+http://127.0.0.1:8081/servlet/~pubapp/com.yonyou.ma.roster.servlet.MARosterPhotoServlet?photoId=123'&type=pid
+```
+
+
+
 
 ## 综合漏洞
 
