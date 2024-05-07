@@ -1,3 +1,5 @@
+记录用友nc6.5源码分析结果
+
 ## 反序列化
 
 http://127.0.0.1:8081/service/~uapim/nc.bs.pub.im.UserQueryServiceServlet
