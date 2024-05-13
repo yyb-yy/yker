@@ -35,7 +35,7 @@ bsh.servlet.BshServlet
 ### sql注入
 
 ```
-	/servlet/~pubapp/com.yonyou.ma.roster.servlet.MARosterPhotoServlet
+	/servlet/~pubapp/com.yonyou.ma.roster.servlet.MARosterPhotoServlet?photoId=1
 ```
 
 
