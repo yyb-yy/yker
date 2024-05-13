@@ -83,7 +83,7 @@ id: yonyou-nc-unserialize-rce
 
 info:
   name: yonyou-nc-unserialize-rce
-  author: wu
+  author: yy
   severity: high
   description: description
   reference:
