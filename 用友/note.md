@@ -1,7 +1,7 @@
 ### 命令执行
 
 ```
-bsh.servlet.BshServlet
+	bsh.servlet.BshServlet
 ```
 
 ### 任意文件上传
