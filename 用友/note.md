@@ -16,6 +16,9 @@ bsh.servlet.BshServlet
 	/servlet/~aim/com.jspsmartaim.upload.ServletUpload 
 	/servlet/~aert/com.ufida.bi.lightpvt.wcf.controller.MultiPartEnabledRequest	
 	/mp/login/../uploadControl/uploadFile
+	/upaim/upload/grouptemplet
+	/upaim/upload/avatar
+	/upaim/upload/groupimage   // 这个中间有个uuid搞不定
 ```
 
 ### 任意文件读取
